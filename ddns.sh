@@ -20,7 +20,7 @@ REAL_IP=$(curl -s https://api.ipify.org)
 echo "real ip: $REAL_IP"
 
 for ip in $IP_LIST
-do 
+do
   if [ "$ip" == "$REAL_IP" ]; then
     public_ip="$ip"
   fi
@@ -38,13 +38,14 @@ DOMAIN_LIST=$(curl -s -H "X-Auth-Key:$API_KEY" -H "X-Auth-Email:$EMAIL" $URL_PRE
 
 DOMAIN_ID=$(echo $DOMAIN_LIST | grep -o "id\":\"[0-9a-fA-F]\{32\}\",\"name\":\"$DOMAIN"|grep -o "[0-9a-fA-F]\{32\}"|head -n1)
 
-echo "domain id: $DOMAIN_ID"
+echo "$DOMAIN domain id: $DOMAIN_ID"
+
+RECORD_LIST=$(curl -s -H "X-Auth-Key:$API_KEY" -H "X-Auth-Email:$EMAIL" $URL_PREFIX/zones/$DOMAIN_ID/dns_records )
 
 for HOST in $HOSTS
 do
-  RECORD_LIST=$(curl -s -H "X-Auth-Key:$API_KEY" -H "X-Auth-Email:$EMAIL" $URL_PREFIX/zones/$DOMAIN_ID/dns_records )
   RECORD_ID=$(echo $RECORD_LIST | grep -o "id\":\"[0-9a-fA-F]\{32\}\",\"type\":\"A\",\"name\":\"$HOST.$DOMAIN"|grep -o "[0-9a-fA-F]\{32\}"|head -n1 )
-  echo "record id: $RECORD_ID"
+  echo "host $HOST.$DOMAIN record id: $RECORD_ID"
 
   if [ "$RECORD_ID" != "" ]; then
     URL="$URL_PREFIX/zones/$DOMAIN_ID/dns_records/$RECORD_ID"
